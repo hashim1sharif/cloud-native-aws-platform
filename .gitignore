@@ -17,3 +17,21 @@ npm-debug.log*
 # Operating system/editor files
 .DS_Store
 .vscode/
+
+# Terraform working directories
+**/.terraform/*
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Terraform crash logs
+crash.log
+crash.*.log
+
+# Local Terraform variable files
+*.tfvars
+!*.tfvars.example
+
+# Terraform plan files
+*.tfplan
