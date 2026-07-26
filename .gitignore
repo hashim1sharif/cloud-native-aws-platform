@@ -1,0 +1,19 @@
+# Environment files
+.env
+**/.env
+
+# Node dependencies
+node_modules/
+**/node_modules/
+
+# Frontend build output
+dist/
+**/dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Operating system/editor files
+.DS_Store
+.vscode/
