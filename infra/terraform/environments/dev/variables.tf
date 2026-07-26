@@ -33,3 +33,12 @@ variable "project_name" {
     error_message = "The project name must contain only lowercase letters, numbers, and hyphens."
   }
 }
+
+variable "vpc_cidr" {
+  type = string
+
+  validation {
+    condition     = can(cidrnetmask(var.vpc_cidr))
+    error_message = "The VPC CIDR must be a valid IPv4 CIDR block."
+  }
+}

@@ -35,3 +35,6 @@ crash.*.log
 
 # Terraform plan files
 *.tfplan
+
+# Local Terraform backend configuration
+**/backend.hcl
