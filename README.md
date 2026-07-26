@@ -1,77 +1,22 @@
-# DevOps three-tier Docker practice
+# Containerized Three-Tier Task Management Platform
 
-This repository simulates a clean developer handover of an application that has not been containerized.
+A full-stack task management application built with React, Node.js, Express, and PostgreSQL.
 
-## Tiers
+The application uses a three-tier architecture and is containerized with Docker. Docker Compose is used to build, configure, and run the frontend, backend API, and database as separate services.
 
-```text
-React frontend -> Express API -> PostgreSQL database
-```
+## Architecture
 
-## Step 1: Configure PostgreSQL
+- Frontend: React and Vite
+- Backend: Node.js and Express
+- Database: PostgreSQL
+- Web server: Nginx
+- Containerization: Docker
+- Local orchestration: Docker Compose
 
-Create the database:
+## Project Goals
 
-```bash
-psql -U postgres -c "CREATE DATABASE devops_tasks;"
-```
-
-Create the table:
-
-```bash
-psql -U postgres -d devops_tasks -f database/init.sql
-```
-
-On Windows, you may also run `database/init.sql` through pgAdmin Query Tool.
-
-## Step 2: Configure and run the backend
-
-```bash
-cp backend/.env.example backend/.env
-```
-
-Open `backend/.env` and set your PostgreSQL password.
-
-```bash
-cd backend
-npm install
-npm run dev
-```
-
-Test:
-
-```bash
-curl http://localhost:5000/health
-```
-
-Expected response:
-
-```json
-{"status":"healthy"}
-```
-
-## Step 3: Configure and run the frontend
-
-Open another terminal from the repository root:
-
-```bash
-cp frontend/.env.example frontend/.env
-cd frontend
-npm install
-npm run dev
-```
-
-Open `http://localhost:5173`.
-
-## Docker task
-
-After local testing succeeds, create:
-
-```text
-backend/Dockerfile
-backend/.dockerignore
-frontend/Dockerfile
-frontend/.dockerignore
-compose.yaml
-.env
-```
+- Build a clean three-tier application architecture
+- Create optimized multi-stage Docker images
+- Separate application configuration from source code
+- Run all services using Docker Compose
+- Prepare the application for deployment to AWS ECS Fargate
