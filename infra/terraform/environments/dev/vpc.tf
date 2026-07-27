@@ -113,3 +113,26 @@ resource "aws_route_table_association" "public_subnet_2_route_table_association"
   subnet_id      = aws_subnet.public_subnet_2.id
   route_table_id = aws_route_table.public_route_table.id
 }
+
+# elastic IP for the NAT gateway
+resource "aws_eip" "elastic_ip" {
+  domain = "vpc"
+
+  tags = {
+    Name = "${local.project_environment_name}-nat-elastic-ip"
+  }
+}
+
+# creating a NAT gateway for the private subnets
+resource "aws_nat_gateway" "nat_gateway" {
+  allocation_id = aws_eip.elastic_ip.id
+  subnet_id     = aws_subnet.public_subnet_1.id
+
+  depends_on = [
+    aws_internet_gateway.internet_gateway
+  ]
+
+  tags = {
+    Name = "${local.project_environment_name}-nat-gateway"
+  }
+}
