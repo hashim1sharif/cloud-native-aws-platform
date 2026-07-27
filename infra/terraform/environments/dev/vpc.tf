@@ -87,3 +87,29 @@ resource "aws_subnet" "private_db_subnet_2" {
     Name = "${local.project_environment_name}-private-db-subnet-2"
   }
 }
+
+# creating a route table for the public subnets
+resource "aws_route_table" "public_route_table" {
+  vpc_id = aws_vpc.vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.internet_gateway.id
+  }
+
+  tags = {
+    Name = "${local.project_environment_name}-public-route-table"
+  }
+}
+
+# associating the public subnet1 with the public route table
+resource "aws_route_table_association" "public_subnet_1_route_table_association" {
+  subnet_id      = aws_subnet.public_subnet_1.id
+  route_table_id = aws_route_table.public_route_table.id
+}
+
+# associating the public subnet2 with the public route table
+resource "aws_route_table_association" "public_subnet_2_route_table_association" {
+  subnet_id      = aws_subnet.public_subnet_2.id
+  route_table_id = aws_route_table.public_route_table.id
+}
