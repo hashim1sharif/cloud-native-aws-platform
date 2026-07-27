@@ -18,11 +18,16 @@ resource "aws_vpc" "vpc" {
 }
 
 # creating an internet gateway for the VPC
+resource "aws_internet_gateway" "internet_gateway" {
+  vpc_id = aws_vpc.vpc.id
 
+  tags = {
+    Name = "${local.project_environment_name}-internet-gateway"
+  }
+}
 
 
 # creating an subnets for the VPC
-
 resource "aws_subnet" "public_subnet_1" {
   vpc_id            = aws_vpc.vpc.id
   cidr_block        = cidrsubnet(var.vpc_cidr, 8, 0)
