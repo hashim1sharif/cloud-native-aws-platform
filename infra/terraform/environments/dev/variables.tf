@@ -42,3 +42,11 @@ variable "vpc_cidr" {
     error_message = "The VPC CIDR must be a valid IPv4 CIDR block."
   }
 }
+variable "container_image_tag" {
+  type = string
+
+  validation {
+    condition     = trimspace(var.container_image_tag) != ""
+    error_message = "The container image tag must not be empty."
+  }
+}
