@@ -77,6 +77,10 @@ resource "aws_ecs_task_definition" "backend_task_definition" {
           value = aws_db_instance.postgres_db_instance.db_name
         },
         {
+          name  = "DB_SSL"
+          value = "true"
+        },
+        {
           name  = "CORS_ORIGIN"
           value = "http://${aws_lb.application_load_balancer.dns_name}"
         }
