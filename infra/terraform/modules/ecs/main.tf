@@ -186,6 +186,12 @@ resource "aws_ecs_service" "frontend_service" {
   desired_count   = 1
   launch_type     = "FARGATE"
 
+  lifecycle {
+    ignore_changes = [
+      task_definition
+    ]
+  }
+
   health_check_grace_period_seconds = 60
 
   network_configuration {
@@ -216,6 +222,12 @@ resource "aws_ecs_service" "backend_service" {
   task_definition = aws_ecs_task_definition.backend_task_definition.arn
   desired_count   = 1
   launch_type     = "FARGATE"
+
+  lifecycle {
+    ignore_changes = [
+      task_definition
+    ]
+  }
 
   health_check_grace_period_seconds = 60
 
