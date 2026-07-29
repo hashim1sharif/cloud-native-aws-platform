@@ -33,6 +33,8 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        VITE_API_URL: "${VITE_API_URL}"
 
     ports:
       - "127.0.0.1:${FRONTEND_HOST_PORT}:80"
