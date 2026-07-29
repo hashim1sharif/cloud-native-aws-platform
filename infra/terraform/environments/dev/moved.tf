@@ -211,3 +211,54 @@ moved {
   from = aws_lb_listener_rule.backend_api_listener_rule
   to   = module.alb.aws_lb_listener_rule.backend_api_listener_rule
 }
+
+# ECS module migration
+moved {
+  from = aws_cloudwatch_log_group.frontend_log_group
+  to   = module.ecs.aws_cloudwatch_log_group.frontend_log_group
+}
+
+moved {
+  from = aws_cloudwatch_log_group.backend_log_group
+  to   = module.ecs.aws_cloudwatch_log_group.backend_log_group
+}
+
+moved {
+  from = aws_ecs_cluster.ecs_cluster
+  to   = module.ecs.aws_ecs_cluster.ecs_cluster
+}
+
+moved {
+  from = aws_iam_role.ecs_task_execution_role
+  to   = module.ecs.aws_iam_role.ecs_task_execution_role
+}
+
+moved {
+  from = aws_iam_role_policy_attachment.ecs_task_execution_role_policy_attachment
+  to   = module.ecs.aws_iam_role_policy_attachment.ecs_task_execution_role_policy_attachment
+}
+
+moved {
+  from = aws_iam_role_policy.ecs_task_execution_secrets_policy
+  to   = module.ecs.aws_iam_role_policy.ecs_task_execution_secrets_policy
+}
+
+moved {
+  from = aws_ecs_task_definition.frontend_task_definition
+  to   = module.ecs.aws_ecs_task_definition.frontend_task_definition
+}
+
+moved {
+  from = aws_ecs_task_definition.backend_task_definition
+  to   = module.ecs.aws_ecs_task_definition.backend_task_definition
+}
+
+moved {
+  from = aws_ecs_service.frontend_service
+  to   = module.ecs.aws_ecs_service.frontend_service
+}
+
+moved {
+  from = aws_ecs_service.backend_service
+  to   = module.ecs.aws_ecs_service.backend_service
+}
