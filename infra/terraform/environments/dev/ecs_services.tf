@@ -16,7 +16,7 @@ resource "aws_ecs_service" "frontend_service" {
     ]
 
     security_groups = [
-      aws_security_group.frontend_security_group.id
+      module.security.frontend_security_group_id
     ]
 
     assign_public_ip = false
@@ -52,7 +52,7 @@ resource "aws_ecs_service" "backend_service" {
     ]
 
     security_groups = [
-      aws_security_group.backend_security_group.id
+      module.security.backend_security_group_id
     ]
 
     assign_public_ip = false

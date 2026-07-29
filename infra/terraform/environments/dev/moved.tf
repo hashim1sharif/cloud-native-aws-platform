@@ -92,3 +92,64 @@ moved {
   from = aws_route_table_association.private_db_subnet_2_route_table_association
   to   = module.network.aws_route_table_association.private_db_subnet_2_route_table_association
 }
+
+# Security module migration
+moved {
+  from = aws_security_group.alb_security_group
+  to   = module.security.aws_security_group.alb_security_group
+}
+
+moved {
+  from = aws_security_group.frontend_security_group
+  to   = module.security.aws_security_group.frontend_security_group
+}
+
+moved {
+  from = aws_security_group.backend_security_group
+  to   = module.security.aws_security_group.backend_security_group
+}
+
+moved {
+  from = aws_security_group.database_security_group
+  to   = module.security.aws_security_group.database_security_group
+}
+
+moved {
+  from = aws_vpc_security_group_ingress_rule.alb_http_ingress
+  to   = module.security.aws_vpc_security_group_ingress_rule.alb_http_ingress
+}
+
+moved {
+  from = aws_vpc_security_group_ingress_rule.frontend_from_alb_ingress
+  to   = module.security.aws_vpc_security_group_ingress_rule.frontend_from_alb_ingress
+}
+
+moved {
+  from = aws_vpc_security_group_ingress_rule.backend_from_alb_ingress
+  to   = module.security.aws_vpc_security_group_ingress_rule.backend_from_alb_ingress
+}
+
+moved {
+  from = aws_vpc_security_group_ingress_rule.database_from_backend_ingress
+  to   = module.security.aws_vpc_security_group_ingress_rule.database_from_backend_ingress
+}
+
+moved {
+  from = aws_vpc_security_group_egress_rule.alb_to_frontend_egress
+  to   = module.security.aws_vpc_security_group_egress_rule.alb_to_frontend_egress
+}
+
+moved {
+  from = aws_vpc_security_group_egress_rule.alb_to_backend_egress
+  to   = module.security.aws_vpc_security_group_egress_rule.alb_to_backend_egress
+}
+
+moved {
+  from = aws_vpc_security_group_egress_rule.frontend_all_egress
+  to   = module.security.aws_vpc_security_group_egress_rule.frontend_all_egress
+}
+
+moved {
+  from = aws_vpc_security_group_egress_rule.backend_all_egress
+  to   = module.security.aws_vpc_security_group_egress_rule.backend_all_egress
+}
