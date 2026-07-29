@@ -18,13 +18,23 @@ variable "aws_region" {
   }
 }
 
-variable "container_image_tag" {
-  description = "Container image tag used by the frontend and backend tasks."
+variable "frontend_image_tag" {
+  description = "Container image tag used by the frontend ECS task."
   type        = string
 
   validation {
-    condition     = trimspace(var.container_image_tag) != ""
-    error_message = "The container image tag must not be empty."
+    condition     = trimspace(var.frontend_image_tag) != ""
+    error_message = "The frontend image tag must not be empty."
+  }
+}
+
+variable "backend_image_tag" {
+  description = "Container image tag used by the backend ECS task."
+  type        = string
+
+  validation {
+    condition     = trimspace(var.backend_image_tag) != ""
+    error_message = "The backend image tag must not be empty."
   }
 }
 

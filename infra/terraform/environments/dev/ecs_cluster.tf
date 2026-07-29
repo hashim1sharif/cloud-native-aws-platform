@@ -1,9 +1,11 @@
 module "ecs" {
   source = "../../modules/ecs"
 
-  name_prefix         = local.project_environment_name
-  aws_region          = var.aws_region
-  container_image_tag = var.container_image_tag
+  name_prefix = local.project_environment_name
+  aws_region  = var.aws_region
+
+  frontend_image_tag = var.frontend_image_tag
+  backend_image_tag  = var.backend_image_tag
 
   frontend_repository_url = module.ecr.frontend_repository_url
   backend_repository_url  = module.ecr.backend_repository_url

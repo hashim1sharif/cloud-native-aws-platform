@@ -42,12 +42,23 @@ variable "vpc_cidr" {
     error_message = "The VPC CIDR must be a valid IPv4 CIDR block."
   }
 }
-variable "container_image_tag" {
-  type = string
+variable "frontend_image_tag" {
+  description = "Container image tag deployed by the frontend ECS service."
+  type        = string
 
   validation {
-    condition     = trimspace(var.container_image_tag) != ""
-    error_message = "The container image tag must not be empty."
+    condition     = trimspace(var.frontend_image_tag) != ""
+    error_message = "The frontend image tag must not be empty."
+  }
+}
+
+variable "backend_image_tag" {
+  description = "Container image tag deployed by the backend ECS service."
+  type        = string
+
+  validation {
+    condition     = trimspace(var.backend_image_tag) != ""
+    error_message = "The backend image tag must not be empty."
   }
 }
 variable "hosted_zone_name" {

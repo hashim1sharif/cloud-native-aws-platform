@@ -80,7 +80,7 @@ resource "aws_ecs_task_definition" "frontend_task_definition" {
   container_definitions = jsonencode([
     {
       name      = "frontend"
-      image     = "${var.frontend_repository_url}:${var.container_image_tag}"
+      image     = "${var.frontend_repository_url}:${var.frontend_image_tag}"
       essential = true
 
       portMappings = [
@@ -117,7 +117,7 @@ resource "aws_ecs_task_definition" "backend_task_definition" {
   container_definitions = jsonencode([
     {
       name      = "backend"
-      image     = "${var.backend_repository_url}:${var.container_image_tag}"
+      image     = "${var.backend_repository_url}:${var.backend_image_tag}"
       essential = true
 
       portMappings = [
