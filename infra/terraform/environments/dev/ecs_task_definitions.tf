@@ -82,7 +82,7 @@ resource "aws_ecs_task_definition" "backend_task_definition" {
         },
         {
           name  = "CORS_ORIGIN"
-          value = "http://${aws_lb.application_load_balancer.dns_name}"
+          value = "http://${module.alb.load_balancer_dns_name}"
         }
       ]
 

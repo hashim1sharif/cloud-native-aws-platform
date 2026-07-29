@@ -23,13 +23,13 @@ resource "aws_ecs_service" "frontend_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.frontend_target_group.arn
+    target_group_arn = module.alb.frontend_target_group_arn
     container_name   = "frontend"
     container_port   = 80
   }
 
   depends_on = [
-    aws_lb_listener.http_listener,
+    module.alb,
     aws_iam_role_policy_attachment.ecs_task_execution_role_policy_attachment
   ]
 }
@@ -59,13 +59,13 @@ resource "aws_ecs_service" "backend_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.backend_target_group.arn
+    target_group_arn = module.alb.backend_target_group_arn
     container_name   = "backend"
     container_port   = 5000
   }
 
   depends_on = [
-    aws_lb_listener_rule.backend_api_listener_rule,
+    module.alb,
     aws_iam_role_policy_attachment.ecs_task_execution_role_policy_attachment,
     aws_iam_role_policy.ecs_task_execution_secrets_policy
   ]

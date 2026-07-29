@@ -185,3 +185,29 @@ moved {
   from = aws_db_instance.postgres_db_instance
   to   = module.rds.aws_db_instance.postgres_db_instance
 }
+
+# ALB module migration
+moved {
+  from = aws_lb.application_load_balancer
+  to   = module.alb.aws_lb.application_load_balancer
+}
+
+moved {
+  from = aws_lb_target_group.frontend_target_group
+  to   = module.alb.aws_lb_target_group.frontend_target_group
+}
+
+moved {
+  from = aws_lb_target_group.backend_target_group
+  to   = module.alb.aws_lb_target_group.backend_target_group
+}
+
+moved {
+  from = aws_lb_listener.http_listener
+  to   = module.alb.aws_lb_listener.http_listener
+}
+
+moved {
+  from = aws_lb_listener_rule.backend_api_listener_rule
+  to   = module.alb.aws_lb_listener_rule.backend_api_listener_rule
+}
