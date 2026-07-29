@@ -67,3 +67,34 @@ resource "aws_lb_listener_rule" "backend_api_listener_rule" {
     }
   }
 }
+
+# Listens for secure HTTPS traffic and sends unmatched requests to the frontend
+resource "aws_lb_listener" "https_listener" {
+  load_balancer_arn = aws_lb.application_load_balancer.arn
+  port              = 443
+  protocol          = "HTTPS"
+  certificate_arn   = var.certificate_arn
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-Res-2021-06"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.frontend_target_group.arn
+  }
+}
+
+# Sends secure API requests to the backend target group
+resource "aws_lb_listener_rule" "https_backend_api_listener_rule" {
+  listener_arn = aws_lb_listener.https_listener.arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.backend_target_group.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/api/*"]
+    }
+  }
+}

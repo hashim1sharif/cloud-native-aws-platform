@@ -99,12 +99,12 @@ variable "backend_target_group_arn" {
 }
 
 variable "load_balancer_dns_name" {
-  description = "DNS name of the Application Load Balancer used as the CORS origin."
+  description = "Allowed browser origin for backend CORS requests."
   type        = string
 
   validation {
-    condition     = trimspace(var.load_balancer_dns_name) != ""
-    error_message = "The load balancer DNS name must not be empty."
+    condition     = can(regex("^https?://", var.load_balancer_dns_name))
+    error_message = "The CORS origin must begin with http:// or https://."
   }
 }
 

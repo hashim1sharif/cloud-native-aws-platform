@@ -27,3 +27,18 @@ output "backend_api_listener_rule_arn" {
   description = "ARN of the backend API listener rule."
   value       = aws_lb_listener_rule.backend_api_listener_rule.arn
 }
+
+output "load_balancer_zone_id" {
+  description = "Route 53 hosted zone ID of the Application Load Balancer."
+  value       = aws_lb.application_load_balancer.zone_id
+}
+
+output "https_listener_arn" {
+  description = "ARN of the HTTPS listener."
+  value       = aws_lb_listener.https_listener.arn
+}
+
+output "https_backend_api_listener_rule_arn" {
+  description = "ARN of the HTTPS backend API listener rule."
+  value       = aws_lb_listener_rule.https_backend_api_listener_rule.arn
+}

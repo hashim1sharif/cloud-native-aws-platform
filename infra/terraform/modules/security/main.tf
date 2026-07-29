@@ -125,3 +125,14 @@ resource "aws_vpc_security_group_egress_rule" "backend_all_egress" {
   cidr_ipv4   = "0.0.0.0/0"
   ip_protocol = "-1"
 }
+
+# Allows public HTTPS traffic from the internet to the ALB
+resource "aws_vpc_security_group_ingress_rule" "alb_https_ingress" {
+  security_group_id = aws_security_group.alb_security_group.id
+  description       = "Allow public HTTPS traffic to the ALB"
+
+  cidr_ipv4   = "0.0.0.0/0"
+  from_port   = 443
+  to_port     = 443
+  ip_protocol = "tcp"
+}

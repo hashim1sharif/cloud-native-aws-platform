@@ -14,7 +14,7 @@ module "ecs" {
 
   frontend_target_group_arn = module.alb.frontend_target_group_arn
   backend_target_group_arn  = module.alb.backend_target_group_arn
-  load_balancer_dns_name    = module.alb.load_balancer_dns_name
+  load_balancer_dns_name    = "https://${local.application_domain_name}"
 
   database_address       = module.rds.database_address
   database_port          = module.rds.database_port

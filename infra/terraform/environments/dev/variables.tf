@@ -50,3 +50,22 @@ variable "container_image_tag" {
     error_message = "The container image tag must not be empty."
   }
 }
+variable "hosted_zone_name" {
+  description = "Name of the existing public Route 53 hosted zone."
+  type        = string
+
+  validation {
+    condition     = trimspace(var.hosted_zone_name) != ""
+    error_message = "The hosted zone name must not be empty."
+  }
+}
+
+variable "application_subdomain" {
+  description = "Subdomain used by the task management application."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[a-z0-9-]+$", var.application_subdomain))
+    error_message = "The application subdomain may contain only lowercase letters, numbers and hyphens."
+  }
+}
