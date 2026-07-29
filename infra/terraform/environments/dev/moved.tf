@@ -153,3 +153,24 @@ moved {
   from = aws_vpc_security_group_egress_rule.backend_all_egress
   to   = module.security.aws_vpc_security_group_egress_rule.backend_all_egress
 }
+
+# ECR module migration
+moved {
+  from = aws_ecr_repository.frontend_ecr_repository
+  to   = module.ecr.aws_ecr_repository.frontend_ecr_repository
+}
+
+moved {
+  from = aws_ecr_repository.backend_ecr_repository
+  to   = module.ecr.aws_ecr_repository.backend_ecr_repository
+}
+
+moved {
+  from = aws_ecr_lifecycle_policy.frontend_ecr_lifecycle_policy
+  to   = module.ecr.aws_ecr_lifecycle_policy.frontend_ecr_lifecycle_policy
+}
+
+moved {
+  from = aws_ecr_lifecycle_policy.backend_ecr_lifecycle_policy
+  to   = module.ecr.aws_ecr_lifecycle_policy.backend_ecr_lifecycle_policy
+}
