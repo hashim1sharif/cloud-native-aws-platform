@@ -11,8 +11,8 @@ resource "aws_ecs_service" "frontend_service" {
 
   network_configuration {
     subnets = [
-      aws_subnet.private_app_subnet_1.id,
-      aws_subnet.private_app_subnet_2.id
+      module.network.private_app_subnet_ids[0],
+      module.network.private_app_subnet_ids[1]
     ]
 
     security_groups = [
@@ -47,8 +47,8 @@ resource "aws_ecs_service" "backend_service" {
 
   network_configuration {
     subnets = [
-      aws_subnet.private_app_subnet_1.id,
-      aws_subnet.private_app_subnet_2.id
+      module.network.private_app_subnet_ids[0],
+      module.network.private_app_subnet_ids[1]
     ]
 
     security_groups = [

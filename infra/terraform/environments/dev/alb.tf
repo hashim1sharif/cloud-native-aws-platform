@@ -9,8 +9,8 @@ resource "aws_lb" "application_load_balancer" {
   ]
 
   subnets = [
-    aws_subnet.public_subnet_1.id,
-    aws_subnet.public_subnet_2.id
+    module.network.public_subnet_ids[0],
+    module.network.public_subnet_ids[1]
   ]
 }
 
@@ -20,7 +20,7 @@ resource "aws_lb_target_group" "frontend_target_group" {
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = module.network.vpc_id
 
   health_check {
     path    = "/"
@@ -34,7 +34,7 @@ resource "aws_lb_target_group" "backend_target_group" {
   port        = 5000
   protocol    = "HTTP"
   target_type = "ip"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = module.network.vpc_id
 
   health_check {
     path    = "/health"

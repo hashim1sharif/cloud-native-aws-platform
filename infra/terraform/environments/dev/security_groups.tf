@@ -2,7 +2,7 @@
 resource "aws_security_group" "alb_security_group" {
   name        = "${local.project_environment_name}-alb-security-group"
   description = "Controls public traffic entering the Application Load Balancer"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = module.network.vpc_id
 
   tags = {
     Name = "${local.project_environment_name}-alb-security-group"
@@ -13,7 +13,7 @@ resource "aws_security_group" "alb_security_group" {
 resource "aws_security_group" "frontend_security_group" {
   name        = "${local.project_environment_name}-frontend-security-group"
   description = "Controls traffic reaching the frontend ECS service"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = module.network.vpc_id
 
   tags = {
     Name = "${local.project_environment_name}-frontend-security-group"
@@ -24,7 +24,7 @@ resource "aws_security_group" "frontend_security_group" {
 resource "aws_security_group" "backend_security_group" {
   name        = "${local.project_environment_name}-backend-security-group"
   description = "Controls traffic reaching the backend ECS service"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = module.network.vpc_id
 
   tags = {
     Name = "${local.project_environment_name}-backend-security-group"
@@ -35,7 +35,7 @@ resource "aws_security_group" "backend_security_group" {
 resource "aws_security_group" "database_security_group" {
   name        = "${local.project_environment_name}-database-security-group"
   description = "Controls PostgreSQL traffic reaching the RDS database"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = module.network.vpc_id
 
   tags = {
     Name = "${local.project_environment_name}-database-security-group"
