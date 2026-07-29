@@ -66,15 +66,15 @@ resource "aws_ecs_task_definition" "backend_task_definition" {
         },
         {
           name  = "DB_HOST"
-          value = aws_db_instance.postgres_db_instance.address
+          value = module.rds.database_address
         },
         {
           name  = "DB_PORT"
-          value = tostring(aws_db_instance.postgres_db_instance.port)
+          value = tostring(module.rds.database_port)
         },
         {
           name  = "DB_NAME"
-          value = aws_db_instance.postgres_db_instance.db_name
+          value = module.rds.database_name
         },
         {
           name  = "DB_SSL"
@@ -89,11 +89,11 @@ resource "aws_ecs_task_definition" "backend_task_definition" {
       secrets = [
         {
           name      = "DB_USER"
-          valueFrom = "${aws_db_instance.postgres_db_instance.master_user_secret[0].secret_arn}:username::"
+          valueFrom = "${module.rds.master_user_secret_arn}:username::"
         },
         {
           name      = "DB_PASSWORD"
-          valueFrom = "${aws_db_instance.postgres_db_instance.master_user_secret[0].secret_arn}:password::"
+          valueFrom = "${module.rds.master_user_secret_arn}:password::"
         }
       ]
 

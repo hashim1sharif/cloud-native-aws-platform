@@ -42,7 +42,7 @@ resource "aws_iam_role_policy" "ecs_task_execution_secrets_policy" {
         ]
 
         Resource = [
-          aws_db_instance.postgres_db_instance.master_user_secret[0].secret_arn
+          module.rds.master_user_secret_arn
         ]
       }
     ]

@@ -174,3 +174,14 @@ moved {
   from = aws_ecr_lifecycle_policy.backend_ecr_lifecycle_policy
   to   = module.ecr.aws_ecr_lifecycle_policy.backend_ecr_lifecycle_policy
 }
+
+# RDS module migration
+moved {
+  from = aws_db_subnet_group.db_subnet_group
+  to   = module.rds.aws_db_subnet_group.db_subnet_group
+}
+
+moved {
+  from = aws_db_instance.postgres_db_instance
+  to   = module.rds.aws_db_instance.postgres_db_instance
+}
