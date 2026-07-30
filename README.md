@@ -3,46 +3,43 @@
 [![Continuous Integration](https://github.com/hashim1sharif/task-management-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/hashim1sharif/task-management-platform/actions/workflows/ci.yml)
 [![Deploy development](https://github.com/hashim1sharif/task-management-platform/actions/workflows/deploy-dev.yml/badge.svg)](https://github.com/hashim1sharif/task-management-platform/actions/workflows/deploy-dev.yml)
 
-I built this project to practise taking a three-tier application from a local Docker setup to a complete AWS deployment.
+I built this project to practise moving a three-tier application from a local Docker setup to a complete AWS deployment.
 
-The frontend and backend run as separate containers on Amazon ECS Fargate. PostgreSQL runs on Amazon RDS, and an Application Load Balancer handles both the website and API traffic. The infrastructure is managed with Terraform, while GitHub Actions builds and deploys new application versions.
+The React frontend and Express backend run as separate containers on Amazon ECS Fargate. The backend stores data in Amazon RDS for PostgreSQL. An Application Load Balancer handles HTTPS traffic and routes browser and API requests to the correct service. Terraform manages the infrastructure, while GitHub Actions builds and deploys new application versions.
 
-**Live environment:** `https://tasks.hashim-next-gen.com`
+**Live environment:** [https://tasks.hashim-next-gen.com](https://tasks.hashim-next-gen.com)
 
-> The development environment may be destroyed when it is not being used to reduce AWS costs.
+> The development environment may be taken offline when it is not being used to reduce AWS costs.
 
 ## Architecture
 
-Add your own exported diagram here:
-
-```markdown
 ![AWS architecture diagram](docs/architecture-diagram.gif)
-```
 
+The platform follows a three-tier architecture:
 
-The main request flow is:
+- **Presentation tier:** React and Nginx running in the frontend ECS service
+- **Application tier:** Node.js and Express running in the backend ECS service
+- **Data tier:** Amazon RDS for PostgreSQL
+
+The Application Load Balancer routes requests as follows:
 
 ```text
-User
-  → Route 53
-  → HTTPS Application Load Balancer
-  → Frontend ECS service
-  → /api/* through the load balancer
-  → Backend ECS service
-  → RDS PostgreSQL
+Browser
+  ├── /        → Route 53 → HTTPS ALB → Frontend ECS service
+  └── /api/*   → Route 53 → HTTPS ALB → Backend ECS service → RDS PostgreSQL
 ```
 
 The frontend and backend tasks run in private application subnets. The database runs in private database subnets and accepts PostgreSQL traffic only from the backend security group.
 
 ## What I built
 
-- A React frontend served by Nginx
-- A Node.js and Express REST API
-- A PostgreSQL database on Amazon RDS
+- React frontend served by Nginx
+- Node.js and Express REST API
+- PostgreSQL database on Amazon RDS
 - Separate frontend and backend Docker images
 - Separate Amazon ECR repositories with immutable image tags
-- Two ECS Fargate services in private subnets
-- An internet-facing Application Load Balancer
+- Two Amazon ECS Fargate services in private subnets
+- Internet-facing Application Load Balancer
 - Path-based routing for `/api/*`
 - HTTPS using Route 53 and AWS Certificate Manager
 - CloudWatch log groups for both services
@@ -56,14 +53,14 @@ The frontend and backend tasks run in private application subnets. The database 
 |---|---|
 | Frontend | React, Vite, Nginx |
 | Backend | Node.js, Express |
-| Database | PostgreSQL on Amazon RDS |
+| Database | Amazon RDS for PostgreSQL |
 | Containers | Docker |
 | Container platform | Amazon ECS Fargate |
 | Container registry | Amazon ECR |
-| Infrastructure | Terraform |
-| Networking | VPC, public and private subnets, NAT Gateway, security groups |
-| Traffic | Application Load Balancer |
-| DNS and HTTPS | Route 53 and AWS Certificate Manager |
+| Infrastructure as Code | Terraform |
+| Networking | Amazon VPC, public and private subnets, NAT Gateway, security groups |
+| Traffic management | Application Load Balancer |
+| DNS and HTTPS | Route 53, AWS Certificate Manager |
 | Logging | Amazon CloudWatch Logs |
 | CI/CD | GitHub Actions |
 | AWS authentication | GitHub OIDC and IAM |
@@ -91,8 +88,10 @@ task-management-platform/
 │       │   └── dev/
 │       └── modules/
 ├── docs/
+│   ├── architecture-diagram.gif
 │   ├── RUNBOOK.md
 │   ├── SCREENSHOTS.md
+│   ├── aws-environment-plan.md
 │   └── screenshots/
 ├── docker-compose.yml
 └── README.md
@@ -100,29 +99,29 @@ task-management-platform/
 
 ## Infrastructure design
 
-The Terraform code is split into modules so each part has one clear responsibility.
+The Terraform code is divided into modules so that each part of the infrastructure has one clear responsibility.
 
 | Module | Responsibility |
 |---|---|
-| `network` | VPC, subnets, routes, Internet Gateway and NAT Gateway |
+| `network` | VPC, subnets, route tables, Internet Gateway and NAT Gateway |
 | `security` | Security groups for the ALB, ECS services and database |
-| `ecr` | Frontend and backend repositories |
+| `ecr` | Frontend and backend container repositories |
 | `rds` | PostgreSQL database and database subnet group |
 | `alb` | Load balancer, listeners, target groups and routing rules |
 | `ecs` | Cluster, task definitions, services, IAM roles and log groups |
 | `acm` | TLS certificate and DNS validation |
 | `route53` | DNS alias record for the application |
 
-The Terraform state is stored remotely in Amazon S3 with the native S3 lockfile enabled.
+Terraform state is stored remotely in Amazon S3. Native S3 state locking is enabled through a lockfile.
 
 ## Security choices
 
 - Only the Application Load Balancer is publicly reachable.
 - ECS tasks do not receive public IP addresses.
-- RDS is not publicly accessible.
+- Amazon RDS is not publicly accessible.
 - The frontend accepts traffic only from the ALB.
 - The backend accepts application traffic only from the ALB.
-- RDS accepts port `5432` only from the backend security group.
+- The database accepts port `5432` only from the backend security group.
 - Database credentials are stored in AWS Secrets Manager.
 - GitHub Actions uses temporary AWS credentials through OIDC.
 - Docker images are tagged with the Git commit SHA.
@@ -132,61 +131,61 @@ The Terraform state is stored remotely in Amazon S3 with the native S3 lockfile 
 
 ### Continuous integration
 
-The CI workflow runs checks for the backend, frontend and Terraform configuration.
+The CI workflow checks the backend, frontend and Terraform configuration.
 
 ```text
-Backend: npm install → syntax check → Docker build
-Frontend: npm install → production build → Docker build
-Terraform: format check → initialization without backend → validation
+Backend:   npm ci → syntax check → Docker build
+Frontend:  npm ci → production build → Docker build
+Terraform: format check → init without backend → validate
 ```
 
-Workflow file: `.github/workflows/ci.yml`
+Workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 
-### Deployment
+### Automated deployment
 
-After changes reach `main`, the deployment workflow:
+After changes are merged into `main`, the deployment workflow:
 
 1. Authenticates to AWS through GitHub OIDC.
 2. Builds the frontend and backend images.
-3. Tags the images with the Git commit SHA.
-4. Pushes both images to Amazon ECR.
+3. Tags both images with the Git commit SHA.
+4. Pushes the images to Amazon ECR.
 5. Registers new ECS task-definition revisions.
 6. Updates the frontend and backend ECS services.
 
-Workflow file: `.github/workflows/deploy-dev.yml`
+Workflow: [`.github/workflows/deploy-dev.yml`](.github/workflows/deploy-dev.yml)
 
 ## Deployment overview
 
 The first deployment is slightly different from later releases because the ECR repositories must exist before the initial images can be pushed.
 
 1. Create the Terraform remote-state infrastructure.
-2. Copy and configure `terraform.tfvars`.
+2. Configure `terraform.tfvars`.
 3. Initialize the development environment.
 4. Create the ECR repositories.
 5. Build and push the first frontend and backend images.
 6. Apply the remaining AWS infrastructure.
 7. Configure the GitHub OIDC deployment role.
-8. Verify ECS, the target groups, HTTPS, CloudWatch logs and the API.
+8. Verify ECS, the target groups, HTTPS, CloudWatch Logs and the API.
 
-After the environment exists, normal releases are handled by GitHub Actions.
+After the environment is running, normal application releases are handled by GitHub Actions.
 
-The exact commands for deployment, verification, destroy and recreation are available in [`docs/RUNBOOK.md`](docs/RUNBOOK.md).
+The full deployment, verification, destroy and recreation commands are documented in [`docs/RUNBOOK.md`](docs/RUNBOOK.md).
 
 ## Local development
 
-Requirements:
+### Requirements
 
 - Git
 - Docker Desktop
 - Docker Compose
 
-Start the application locally:
+Start the application:
 
 ```bash
 docker compose up --build
 ```
 
-Stop it:
+Stop the application:
 
 ```bash
 docker compose down
@@ -202,7 +201,7 @@ terraform -chdir=infra/terraform/environments/dev init \
   -backend-config=backend.hcl
 ```
 
-Validate the configuration:
+Format and validate the configuration:
 
 ```bash
 terraform fmt -recursive infra/terraform
@@ -222,11 +221,11 @@ terraform -chdir=infra/terraform/environments/dev plan \
 
 ![VPC resource map](docs/screenshots/06-vpc-resource-map.png)
 
-### Load balancer
+### Application Load Balancer
 
 ![Application Load Balancer](docs/screenshots/07-application-load-balancer.png)
 
-### ECS services
+### ECS Fargate services
 
 ![ECS cluster services](docs/screenshots/09-ecs-cluster-services.png)
 
@@ -254,24 +253,24 @@ The complete screenshot gallery is available in [`docs/SCREENSHOTS.md`](docs/SCR
 
 ## What I learned
 
-This project helped me understand how the different parts of an AWS container platform work together. The most useful lessons were:
+This project helped me understand how the different parts of an AWS container platform work together. The main lessons were:
 
 - separating public, application and database network layers;
-- connecting ALB routing to separate ECS services;
-- handling the first deployment when the ECR repositories are still empty;
+- routing website and API traffic to separate ECS services;
+- handling the first deployment before container images exist in ECR;
 - using immutable image tags for traceable releases;
 - keeping Terraform responsible for infrastructure while GitHub Actions handles application releases;
 - using OIDC instead of storing permanent AWS credentials in GitHub.
 
 ## Possible improvements
 
-- Add backend unit and integration tests.
-- Add frontend tests and linting.
-- Add CloudWatch alarms and dashboards.
-- Add vulnerability scanning for images and dependencies.
-- Add separate staging and production environments.
-- Add production approval and rollback controls.
-- Add database restore testing.
+- Add backend unit and integration tests
+- Add frontend tests and linting
+- Add CloudWatch alarms and dashboards
+- Add vulnerability scanning for images and dependencies
+- Add separate staging and production environments
+- Add production approval and rollback controls
+- Add database restore testing
 
 ## Documentation
 
