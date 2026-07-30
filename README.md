@@ -196,23 +196,27 @@ docker compose down
 Initialize the development environment:
 
 ```bash
-terraform -chdir=infra/terraform/environments/dev init \
-  -reconfigure \
-  -backend-config=backend.hcl
+terraform init 
 ```
 
 Format and validate the configuration:
 
 ```bash
-terraform fmt -recursive infra/terraform
-terraform -chdir=infra/terraform/environments/dev validate
+terraform fmt 
+
+terraform validate
 ```
 
 Create a plan:
 
 ```bash
-terraform -chdir=infra/terraform/environments/dev plan \
-  -parallelism=1
+terraform  plan 
+
+```
+
+```bash
+terraform  apply
+
 ```
 
 ## Project evidence
