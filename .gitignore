@@ -38,3 +38,5 @@ crash.*.log
 
 # Local Terraform backend configuration
 **/backend.hcl
+# diagrams.net backup files
+*.drawio.bkp
