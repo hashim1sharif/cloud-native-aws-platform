@@ -58,8 +58,18 @@ variable "backend_repository_url" {
   }
 }
 
+variable "public_subnet_ids" {
+  description = "IDs of the public subnets used by the frontend ECS service."
+  type        = list(string)
+
+  validation {
+    condition     = length(var.public_subnet_ids) >= 2
+    error_message = "At least two public subnet IDs must be provided."
+  }
+}
+
 variable "private_app_subnet_ids" {
-  description = "IDs of the private application subnets used by ECS services."
+  description = "IDs of the private application subnets used by the backend ECS service."
   type        = list(string)
 
   validation {
