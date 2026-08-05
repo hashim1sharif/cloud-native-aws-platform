@@ -32,6 +32,7 @@ crash.*.log
 # Local Terraform variable files
 *.tfvars
 !*.tfvars.example
+!infra/terraform/environments/dev/dev.auto.tfvars
 
 # Terraform plan files
 *.tfplan
