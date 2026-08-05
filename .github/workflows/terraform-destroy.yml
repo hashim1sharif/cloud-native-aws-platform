@@ -23,6 +23,16 @@ env:
   TF_STATE_BUCKET: task-management-platform-state-lock-eu-west-1
   TF_STATE_KEY: task-management/dev/terraform.tfstate
 
+  TF_VAR_aws_account_id: "731629701372"
+  TF_VAR_aws_region: eu-west-1
+  TF_VAR_environment: dev
+  TF_VAR_project_name: task-management
+  TF_VAR_vpc_cidr: "10.20.0.0/16"
+  TF_VAR_frontend_image_tag: bootstrap
+  TF_VAR_backend_image_tag: bootstrap
+  TF_VAR_hosted_zone_name: hashim-next-gen.com
+  TF_VAR_application_subdomain: tasks
+
 jobs:
   destroy:
     name: Destroy development infrastructure

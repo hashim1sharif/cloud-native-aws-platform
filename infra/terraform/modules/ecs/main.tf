@@ -178,17 +178,18 @@ resource "aws_ecs_task_definition" "backend_task_definition" {
   ])
 }
 
-# Runs the frontend container in the public subnets
+# Creates the frontend ECS service without starting tasks before an image exists
 resource "aws_ecs_service" "frontend_service" {
   name            = "${var.name_prefix}-frontend-service"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.frontend_task_definition.arn
-  desired_count   = 1
+  desired_count   = 0
   launch_type     = "FARGATE"
 
   lifecycle {
     ignore_changes = [
-      task_definition
+      task_definition,
+      desired_count
     ]
   }
 
@@ -215,17 +216,18 @@ resource "aws_ecs_service" "frontend_service" {
   ]
 }
 
-# Runs the backend container in the private application subnets
+# Creates the backend ECS service without starting tasks before an image exists
 resource "aws_ecs_service" "backend_service" {
   name            = "${var.name_prefix}-backend-service"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.backend_task_definition.arn
-  desired_count   = 1
+  desired_count   = 0
   launch_type     = "FARGATE"
 
   lifecycle {
     ignore_changes = [
-      task_definition
+      task_definition,
+      desired_count
     ]
   }
 

@@ -114,13 +114,26 @@ jobs:
           container-name: backend
           image: ${{ steps.images.outputs.backend_image }}
 
-      - name: Deploy backend ECS service
+      - name: Deploy backend ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.backend-task-definition.outputs.task-definition }}
           service: ${{ env.BACKEND_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
+
+      - name: Start backend ECS service
+        run: |
+          set -euo pipefail
+
+          aws ecs update-service \
+            --cluster "${ECS_CLUSTER}" \
+            --service "${BACKEND_SERVICE}" \
+            --desired-count 1
+
+          aws ecs wait services-stable \
+            --cluster "${ECS_CLUSTER}" \
+            --services "${BACKEND_SERVICE}"
 
       - name: Update frontend task definition
         id: frontend-task-definition
@@ -130,10 +143,23 @@ jobs:
           container-name: frontend
           image: ${{ steps.images.outputs.frontend_image }}
 
-      - name: Deploy frontend ECS service
+      - name: Deploy frontend ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.frontend-task-definition.outputs.task-definition }}
           service: ${{ env.FRONTEND_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
+
+      - name: Start frontend ECS service
+        run: |
+          set -euo pipefail
+
+          aws ecs update-service \
+            --cluster "${ECS_CLUSTER}" \
+            --service "${FRONTEND_SERVICE}" \
+            --desired-count 1
+
+          aws ecs wait services-stable \
+            --cluster "${ECS_CLUSTER}" \
+            --services "${FRONTEND_SERVICE}"
