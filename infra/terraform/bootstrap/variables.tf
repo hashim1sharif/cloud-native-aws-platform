@@ -14,3 +14,12 @@ variable "aws_region" {
 variable "state_bucket_name" {
   type = string
 }
+
+variable "github_oidc_subject" {
+  type = string
+
+  validation {
+    condition     = trimspace(var.github_oidc_subject) != ""
+    error_message = "The GitHub OIDC subject must not be empty."
+  }
+}
