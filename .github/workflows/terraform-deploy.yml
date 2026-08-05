@@ -10,9 +10,13 @@ permissions:
 env:
   AWS_REGION: eu-west-1
   AWS_ROLE_ARN: arn:aws:iam::731629701372:role/task-management-terraform-role
+
   TERRAFORM_VERSION: 1.13.3
   TF_IN_AUTOMATION: true
   TF_INPUT: false
+
+  TF_STATE_BUCKET: task-management-platform-state-lock-eu-west-1
+  TF_STATE_KEY: task-management/dev/terraform.tfstate
 
 jobs:
   deploy:
@@ -43,7 +47,11 @@ jobs:
         run: |
           terraform -chdir=infra/terraform/environments/dev init \
             -reconfigure \
-            -backend-config=backend.hcl
+            -backend-config="bucket=${TF_STATE_BUCKET}" \
+            -backend-config="key=${TF_STATE_KEY}" \
+            -backend-config="region=${AWS_REGION}" \
+            -backend-config="encrypt=true" \
+            -backend-config="use_lockfile=true"
 
       - name: Validate Terraform
         run: terraform -chdir=infra/terraform/environments/dev validate
