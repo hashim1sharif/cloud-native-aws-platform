@@ -8,6 +8,11 @@ output "load_balancer_arn" {
   value       = aws_lb.application_load_balancer.arn
 }
 
+output "load_balancer_zone_id" {
+  description = "Route 53 hosted zone ID of the Application Load Balancer."
+  value       = aws_lb.application_load_balancer.zone_id
+}
+
 output "frontend_target_group_arn" {
   description = "ARN of the frontend target group."
   value       = aws_lb_target_group.frontend_target_group.arn
@@ -19,18 +24,8 @@ output "backend_target_group_arn" {
 }
 
 output "http_listener_arn" {
-  description = "ARN of the HTTP listener."
+  description = "ARN of the HTTP listener that redirects traffic to HTTPS."
   value       = aws_lb_listener.http_listener.arn
-}
-
-output "backend_api_listener_rule_arn" {
-  description = "ARN of the backend API listener rule."
-  value       = aws_lb_listener_rule.backend_api_listener_rule.arn
-}
-
-output "load_balancer_zone_id" {
-  description = "Route 53 hosted zone ID of the Application Load Balancer."
-  value       = aws_lb.application_load_balancer.zone_id
 }
 
 output "https_listener_arn" {
@@ -39,6 +34,6 @@ output "https_listener_arn" {
 }
 
 output "https_backend_api_listener_rule_arn" {
-  description = "ARN of the HTTPS backend API listener rule."
+  description = "ARN of the HTTPS listener rule that routes API traffic to the backend target group."
   value       = aws_lb_listener_rule.https_backend_api_listener_rule.arn
 }

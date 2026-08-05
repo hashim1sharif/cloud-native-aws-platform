@@ -178,7 +178,7 @@ resource "aws_ecs_task_definition" "backend_task_definition" {
   ])
 }
 
-# Runs the frontend container in the private application subnets
+# Runs the frontend container in the public subnets
 resource "aws_ecs_service" "frontend_service" {
   name            = "${var.name_prefix}-frontend-service"
   cluster         = aws_ecs_cluster.ecs_cluster.id
@@ -195,13 +195,13 @@ resource "aws_ecs_service" "frontend_service" {
   health_check_grace_period_seconds = 60
 
   network_configuration {
-    subnets = var.private_app_subnet_ids
+    subnets = var.public_subnet_ids
 
     security_groups = [
       var.frontend_security_group_id
     ]
 
-    assign_public_ip = false
+    assign_public_ip = true
   }
 
   load_balancer {

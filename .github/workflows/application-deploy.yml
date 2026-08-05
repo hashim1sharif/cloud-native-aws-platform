@@ -1,0 +1,139 @@
+name: Application Deployment
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: eu-west-1
+  AWS_ROLE_ARN: arn:aws:iam::731629701372:role/task-management-dev-github-actions-deploy-role
+
+  ECS_CLUSTER: task-management-dev-ecs-cluster
+
+  BACKEND_SERVICE: task-management-dev-backend-service
+  FRONTEND_SERVICE: task-management-dev-frontend-service
+
+  BACKEND_REPOSITORY: task-management-dev-backend
+  FRONTEND_REPOSITORY: task-management-dev-frontend
+
+jobs:
+  deploy:
+    name: Build, push and deploy application
+    runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout application source
+        uses: actions/checkout@v6
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push container images
+        id: images
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          BACKEND_IMAGE="${ECR_REGISTRY}/${BACKEND_REPOSITORY}:${IMAGE_TAG}"
+          FRONTEND_IMAGE="${ECR_REGISTRY}/${FRONTEND_REPOSITORY}:${IMAGE_TAG}"
+
+          docker build \
+            --file backend/Dockerfile \
+            --tag "${BACKEND_IMAGE}" \
+            backend
+
+          docker push "${BACKEND_IMAGE}"
+
+          docker build \
+            --file frontend/Dockerfile \
+            --tag "${FRONTEND_IMAGE}" \
+            frontend
+
+          docker push "${FRONTEND_IMAGE}"
+
+          echo "backend_image=${BACKEND_IMAGE}" >> "${GITHUB_OUTPUT}"
+          echo "frontend_image=${FRONTEND_IMAGE}" >> "${GITHUB_OUTPUT}"
+
+      - name: Download current ECS task definitions
+        run: |
+          set -euo pipefail
+
+          BACKEND_TASK_DEFINITION="$(aws ecs describe-services \
+            --cluster "${ECS_CLUSTER}" \
+            --services "${BACKEND_SERVICE}" \
+            --query 'services[0].taskDefinition' \
+            --output text)"
+
+          if [[ -z "${BACKEND_TASK_DEFINITION}" || "${BACKEND_TASK_DEFINITION}" == "None" ]]; then
+            echo "Unable to find the backend ECS task definition."
+            exit 1
+          fi
+
+          aws ecs describe-task-definition \
+            --task-definition "${BACKEND_TASK_DEFINITION}" \
+            --query 'taskDefinition' \
+            --output json \
+            > backend-task-definition.json
+
+          FRONTEND_TASK_DEFINITION="$(aws ecs describe-services \
+            --cluster "${ECS_CLUSTER}" \
+            --services "${FRONTEND_SERVICE}" \
+            --query 'services[0].taskDefinition' \
+            --output text)"
+
+          if [[ -z "${FRONTEND_TASK_DEFINITION}" || "${FRONTEND_TASK_DEFINITION}" == "None" ]]; then
+            echo "Unable to find the frontend ECS task definition."
+            exit 1
+          fi
+
+          aws ecs describe-task-definition \
+            --task-definition "${FRONTEND_TASK_DEFINITION}" \
+            --query 'taskDefinition' \
+            --output json \
+            > frontend-task-definition.json
+
+      - name: Update backend task definition
+        id: backend-task-definition
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: backend-task-definition.json
+          container-name: backend
+          image: ${{ steps.images.outputs.backend_image }}
+
+      - name: Deploy backend ECS service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.backend-task-definition.outputs.task-definition }}
+          service: ${{ env.BACKEND_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+      - name: Update frontend task definition
+        id: frontend-task-definition
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: frontend-task-definition.json
+          container-name: frontend
+          image: ${{ steps.images.outputs.frontend_image }}
+
+      - name: Deploy frontend ECS service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.frontend-task-definition.outputs.task-definition }}
+          service: ${{ env.FRONTEND_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
