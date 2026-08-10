@@ -1,91 +1,46 @@
 name: Continuous Integration
 
 on:
-  pull_request:
-    branches:
-      - main
-
   push:
     branches:
       - main
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
-  backend:
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: backend
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: "22"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Check JavaScript syntax
-        run: find src -type f -name '*.js' -exec node --check {} \;
-
-      - name: Build Docker image
-        run: docker build -t task-management-backend:ci .
-
-  frontend:
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: frontend
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: "22"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build application
-        run: npm run build
-
-      - name: Build Docker image
-        run: docker build -t task-management-frontend:ci .
-
-  terraform:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
         with:
-          terraform_version: "1.13.3"
+          role-to-assume: arn:aws:iam::731629701372:role/task-management-dev-github-actions-deploy-role
+          aws-region: eu-west-1
 
-      - name: Check Terraform formatting
-        run: terraform fmt -check -recursive infra/terraform
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Initialize bootstrap
-        run: terraform -chdir=infra/terraform/bootstrap init -backend=false
+      - name: Build and push backend image
+        run: |
+          docker build \
+            -t ${{ steps.login-ecr.outputs.registry }}/task-management-dev-backend:${{ github.sha }} \
+            ./backend
 
-      - name: Validate bootstrap
-        run: terraform -chdir=infra/terraform/bootstrap validate
+          docker push \
+            ${{ steps.login-ecr.outputs.registry }}/task-management-dev-backend:${{ github.sha }}
 
-      - name: Initialize dev environment
-        run: terraform -chdir=infra/terraform/environments/dev init -backend=false
+      - name: Build and push frontend image
+        run: |
+          docker build \
+            -t ${{ steps.login-ecr.outputs.registry }}/task-management-dev-frontend:${{ github.sha }} \
+            ./frontend
 
-      - name: Validate dev environment
-        run: terraform -chdir=infra/terraform/environments/dev validate
+          docker push \
+            ${{ steps.login-ecr.outputs.registry }}/task-management-dev-frontend:${{ github.sha }}
