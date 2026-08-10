@@ -29,43 +29,43 @@ jobs:
 
       - name: Build and push images
         run: |
-          docker build -t ${{ steps.ecr.outputs.registry }}/task-management-dev-backend:${{ github.sha }} ./backend
-          docker push ${{ steps.ecr.outputs.registry }}/task-management-dev-backend:${{ github.sha }}
+          docker build -t ${{ steps.ecr.outputs.registry }}/task-management-dev-backend:${{ github.sha }}-${{ github.run_attempt }} ./backend
+          docker push ${{ steps.ecr.outputs.registry }}/task-management-dev-backend:${{ github.sha }}-${{ github.run_attempt }}
 
-          docker build -t ${{ steps.ecr.outputs.registry }}/task-management-dev-frontend:${{ github.sha }} ./frontend
-          docker push ${{ steps.ecr.outputs.registry }}/task-management-dev-frontend:${{ github.sha }}
+          docker build -t ${{ steps.ecr.outputs.registry }}/task-management-dev-frontend:${{ github.sha }}-${{ github.run_attempt }} ./frontend
+          docker push ${{ steps.ecr.outputs.registry }}/task-management-dev-frontend:${{ github.sha }}-${{ github.run_attempt }}
 
-      - name: Render backend task definition
+      - name: Render backend
         id: backend
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition-family: task-management-dev-backend
           container-name: backend
-          image: ${{ steps.ecr.outputs.registry }}/task-management-dev-backend:${{ github.sha }}
+          image: ${{ steps.ecr.outputs.registry }}/task-management-dev-backend:${{ github.sha }}-${{ github.run_attempt }}
 
       - name: Deploy backend
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.backend.outputs.task-definition }}
-          cluster: task-management-dev-ecs-cluster
           service: task-management-dev-backend-service
+          cluster: task-management-dev-ecs-cluster
 
-      - name: Render frontend task definition
+      - name: Render frontend
         id: frontend
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition-family: task-management-dev-frontend
           container-name: frontend
-          image: ${{ steps.ecr.outputs.registry }}/task-management-dev-frontend:${{ github.sha }}
+          image: ${{ steps.ecr.outputs.registry }}/task-management-dev-frontend:${{ github.sha }}-${{ github.run_attempt }}
 
       - name: Deploy frontend
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.frontend.outputs.task-definition }}
-          cluster: task-management-dev-ecs-cluster
           service: task-management-dev-frontend-service
+          cluster: task-management-dev-ecs-cluster
 
-      - name: Start ECS services
+      - name: Start services
         run: |
           aws ecs update-service --cluster task-management-dev-ecs-cluster --service task-management-dev-backend-service --desired-count 1 --region eu-west-1
           aws ecs update-service --cluster task-management-dev-ecs-cluster --service task-management-dev-frontend-service --desired-count 1 --region eu-west-1
