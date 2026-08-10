@@ -86,7 +86,8 @@ data "aws_iam_policy_document" "github_actions_deploy_permissions" {
 
     actions = [
       "ecs:DescribeTaskDefinition",
-      "ecs:RegisterTaskDefinition"
+      "ecs:RegisterTaskDefinition",
+      "ecs:TagResource"
     ]
 
     resources = [
