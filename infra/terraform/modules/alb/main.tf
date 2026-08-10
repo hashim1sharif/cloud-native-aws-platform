@@ -93,7 +93,7 @@ resource "aws_lb_listener_rule" "https_backend_api_listener_rule" {
 
   condition {
     path_pattern {
-      values = ["/api/*"]
+      values = ["/api/*" , "/health"]
     }
   }
 }
