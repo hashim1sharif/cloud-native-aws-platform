@@ -11,10 +11,13 @@ resource "aws_lb" "application_load_balancer" {
   subnets = var.public_subnet_ids
 }
 
-# Routes frontend traffic to ECS tasks running on port 80
+# Routes frontend traffic to ECS tasks running on port 8080
 resource "aws_lb_target_group" "frontend_target_group" {
-  name        = "${var.name_prefix}-frontend-tg"
-  port        = 80
+  # A static name can't be reused while the old target group is still
+  # attached to the HTTPS listener, so this needs a generated name to
+  # allow create_before_destroy to swap it in without a naming conflict.
+  name_prefix = "fe-tg-"
+  port        = 8080
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = var.vpc_id
@@ -22,6 +25,14 @@ resource "aws_lb_target_group" "frontend_target_group" {
   health_check {
     path    = "/"
     matcher = "200"
+  }
+
+  tags = {
+    Name = "${var.name_prefix}-frontend-tg"
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 

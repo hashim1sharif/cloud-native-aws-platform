@@ -85,7 +85,7 @@ resource "aws_ecs_task_definition" "frontend_task_definition" {
 
       portMappings = [
         {
-          containerPort = 80
+          containerPort = 8080
           protocol      = "tcp"
         }
       ]
@@ -208,7 +208,7 @@ resource "aws_ecs_service" "frontend_service" {
   load_balancer {
     target_group_arn = var.frontend_target_group_arn
     container_name   = "frontend"
-    container_port   = 80
+    container_port   = 8080
   }
 
   depends_on = [
