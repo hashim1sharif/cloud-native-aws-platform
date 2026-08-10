@@ -53,14 +53,14 @@ resource "aws_vpc_security_group_ingress_rule" "alb_http_ingress" {
   ip_protocol = "tcp"
 }
 
-# Allows the ALB to reach the frontend ECS service on port 80
+# Allows the ALB to reach the frontend ECS service on port 8080
 resource "aws_vpc_security_group_ingress_rule" "frontend_from_alb_ingress" {
   security_group_id = aws_security_group.frontend_security_group.id
   description       = "Allow HTTP traffic from the ALB to the frontend"
 
   referenced_security_group_id = aws_security_group.alb_security_group.id
-  from_port                    = 80
-  to_port                      = 80
+  from_port                    = 8080
+  to_port                      = 8080
   ip_protocol                  = "tcp"
 }
 
@@ -92,8 +92,8 @@ resource "aws_vpc_security_group_egress_rule" "alb_to_frontend_egress" {
   description       = "Allow HTTP traffic from the ALB to the frontend"
 
   referenced_security_group_id = aws_security_group.frontend_security_group.id
-  from_port                    = 80
-  to_port                      = 80
+  from_port                    = 8080
+  to_port                      = 8080
   ip_protocol                  = "tcp"
 }
 

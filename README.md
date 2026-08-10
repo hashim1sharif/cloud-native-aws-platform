@@ -88,20 +88,21 @@ Route 53
   ▼
 Internet-facing Application Load Balancer
   ├── HTTP :80      → Redirect to HTTPS :443
-  ├── HTTPS /       → Frontend ECS service in public subnets
-  └── HTTPS /api/*  → Backend ECS service in private application subnets
+  ├── HTTPS /       → Frontend ECS :8080 in public subnets
+  └── HTTPS /api/*  → Backend ECS :5000 in private application subnets
                               │
                               ▼
-                    RDS PostgreSQL in private database subnets
+                    RDS PostgreSQL :5432 in private database subnets
 ```
 
 ### Network design
 
 - The frontend service runs in public subnets
 - Frontend tasks receive public IP addresses
-- The frontend security group accepts traffic only from the ALB
-- The backend service runs in private application subnets
-- Backend tasks do not receive public IP addresses
+- The ALB forwards frontend traffic to container port `8080`
+- The frontend accepts port `8080` only from the ALB security group
+- The backend service runs in private application subnets without public IP addresses
+- The ALB forwards API traffic to backend port `5000`
 - Private application subnets use a NAT Gateway for outbound access
 - Amazon RDS runs in private database subnets
 - The database accepts port `5432` only from the backend security group
@@ -178,12 +179,11 @@ task-management-platform/
 │           └── security/
 ├── docs/
 │   ├── architecture-diagram.gif
-│   ├── architecture-diagram.drawio
 │   ├── RUNBOOK.md
 │   ├── SCREENSHOTS.md
 │   ├── aws-environment-plan.md
 │   └── screenshots/
-├── docker-compose.yml
+├── docker-compose.yaml
 └── README.md
 ```
 
@@ -210,7 +210,7 @@ The bootstrap configuration creates the remote-state S3 bucket and the Terraform
 
 - Public HTTP traffic is redirected to HTTPS
 - The ALB is the only component that accepts public inbound traffic
-- The frontend accepts inbound traffic only from the ALB security group
+- The frontend accepts port `8080` only from the ALB security group
 - The backend has no public IP address
 - Amazon RDS is not publicly accessible
 - The database accepts PostgreSQL traffic only from the backend security group
@@ -435,7 +435,6 @@ The complete screenshot gallery is available in [`docs/SCREENSHOTS.md`](docs/SCR
 - [Deployment and operations runbook](docs/RUNBOOK.md)
 - [Screenshot gallery](docs/SCREENSHOTS.md)
 - [AWS environment plan](docs/aws-environment-plan.md)
-- [Editable architecture diagram](docs/architecture-diagram.drawio)
 
 ## Author
 
