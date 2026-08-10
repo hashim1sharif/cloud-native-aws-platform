@@ -79,22 +79,6 @@ Before production use, I would run load tests, add CloudWatch alarms, configure 
 
 ![AWS architecture diagram](docs/architecture-diagram.gif)
 
-```text
-Browser
-  │
-  ▼
-Route 53
-  │
-  ▼
-Internet-facing Application Load Balancer
-  ├── HTTP :80      → Redirect to HTTPS :443
-  ├── HTTPS /       → Frontend ECS :8080 in public subnets
-  └── HTTPS /api/*  → Backend ECS :5000 in private application subnets
-                              │
-                              ▼
-                    RDS PostgreSQL :5432 in private database subnets
-```
-
 ### Network design
 
 - The frontend service runs in public subnets
@@ -128,22 +112,22 @@ Internet-facing Application Load Balancer
 
 ## Technology stack
 
-| Area | Technology |
-|---|---|
-| Frontend | React, Vite, Nginx |
-| Backend | Node.js, Express |
-| Database | Amazon RDS for PostgreSQL |
-| Containers | Docker |
-| Container platform | Amazon ECS Fargate |
-| Container registry | Amazon ECR |
-| Infrastructure as Code | Terraform |
-| Networking | Amazon VPC, subnets, route tables, Internet Gateway, NAT Gateway, security groups |
-| Traffic management | Application Load Balancer |
-| DNS and HTTPS | Amazon Route 53, AWS Certificate Manager |
-| Secrets | AWS Secrets Manager |
-| Logging | Amazon CloudWatch Logs |
-| CI/CD | GitHub Actions |
-| AWS authentication | GitHub OIDC and IAM |
+| Area                   | Technology                                                                        |
+| ---------------------- | --------------------------------------------------------------------------------- |
+| Frontend               | React, Vite, Nginx                                                                |
+| Backend                | Node.js, Express                                                                  |
+| Database               | Amazon RDS for PostgreSQL                                                         |
+| Containers             | Docker                                                                            |
+| Container platform     | Amazon ECS Fargate                                                                |
+| Container registry     | Amazon ECR                                                                        |
+| Infrastructure as Code | Terraform                                                                         |
+| Networking             | Amazon VPC, subnets, route tables, Internet Gateway, NAT Gateway, security groups |
+| Traffic management     | Application Load Balancer                                                         |
+| DNS and HTTPS          | Amazon Route 53, AWS Certificate Manager                                          |
+| Secrets                | AWS Secrets Manager                                                               |
+| Logging                | Amazon CloudWatch Logs                                                            |
+| CI/CD                  | GitHub Actions                                                                    |
+| AWS authentication     | GitHub OIDC and IAM                                                               |
 
 ## Repository structure
 
@@ -191,16 +175,16 @@ task-management-platform/
 
 The Terraform code is divided into reusable modules.
 
-| Module | Responsibility |
-|---|---|
-| `network` | VPC, subnets, route tables, Internet Gateway, and NAT Gateway |
-| `security` | Security groups and traffic rules |
-| `ecr` | Frontend and backend repositories |
-| `rds` | PostgreSQL database and database subnet group |
-| `alb` | Load balancer, listeners, target groups, and routing |
-| `ecs` | Cluster, task definitions, services, IAM role, and log groups |
-| `acm` | TLS certificate and DNS validation |
-| `route53` | DNS alias record |
+| Module     | Responsibility                                                |
+| ---------- | ------------------------------------------------------------- |
+| `network`  | VPC, subnets, route tables, Internet Gateway, and NAT Gateway |
+| `security` | Security groups and traffic rules                             |
+| `ecr`      | Frontend and backend repositories                             |
+| `rds`      | PostgreSQL database and database subnet group                 |
+| `alb`      | Load balancer, listeners, target groups, and routing          |
+| `ecs`      | Cluster, task definitions, services, IAM role, and log groups |
+| `acm`      | TLS certificate and DNS validation                            |
+| `route53`  | DNS alias record                                              |
 
 Terraform state is stored remotely in Amazon S3 with native S3 state locking.
 
