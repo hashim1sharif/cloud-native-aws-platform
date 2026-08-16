@@ -32,7 +32,7 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
       variable = "token.actions.githubusercontent.com:sub"
 
       values = [
-        "repo:hashim1sharif@97352574/task-management-platform@1312772280:ref:refs/heads/main"
+        "repo:hashim1sharif@97352574/cloud-native-aws-platform@1312772280:ref:refs/heads/main"
       ]
     }
   }
