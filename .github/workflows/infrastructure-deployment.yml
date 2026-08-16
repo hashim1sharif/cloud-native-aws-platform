@@ -1,7 +1,9 @@
-name: Deploy Dev
+name: Infrastructure Deployment
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -16,7 +18,7 @@ jobs:
         working-directory: infra/terraform/environments/dev
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v6
 
       - name: Configure AWS credentials
@@ -25,7 +27,7 @@ jobs:
           role-to-assume: arn:aws:iam::731629701372:role/task-management-terraform-role
           aws-region: eu-west-1
 
-      - name: Set up Terraform
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: "1.13.3"

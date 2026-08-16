@@ -1,21 +1,25 @@
-name: Continuous Integration
+name: Application Deployment
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Infrastructure Deployment"]
+    types:
+      - completed
 
 permissions:
   contents: read
   id-token: write
 
 jobs:
-  build-and-deploy:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -29,37 +33,35 @@ jobs:
 
       - name: Build and push images
         run: |
-          docker build -t ${{ steps.ecr.outputs.registry }}/task-management-dev-backend:${{ github.sha }}-${{ github.run_attempt }} ./backend
-          docker push ${{ steps.ecr.outputs.registry }}/task-management-dev-backend:${{ github.sha }}-${{ github.run_attempt }}
+          docker build -t ${{ steps.ecr.outputs.registry }}/task-management-dev-backend:${{ github.event.workflow_run.head_sha }}-${{ github.run_attempt }} ./backend
+          docker push ${{ steps.ecr.outputs.registry }}/task-management-dev-backend:${{ github.event.workflow_run.head_sha }}-${{ github.run_attempt }}
 
-          docker build -t ${{ steps.ecr.outputs.registry }}/task-management-dev-frontend:${{ github.sha }}-${{ github.run_attempt }} ./frontend
-          docker push ${{ steps.ecr.outputs.registry }}/task-management-dev-frontend:${{ github.sha }}-${{ github.run_attempt }}
+          docker build -t ${{ steps.ecr.outputs.registry }}/task-management-dev-frontend:${{ github.event.workflow_run.head_sha }}-${{ github.run_attempt }} ./frontend
+          docker push ${{ steps.ecr.outputs.registry }}/task-management-dev-frontend:${{ github.event.workflow_run.head_sha }}-${{ github.run_attempt }}
 
-      - name: Render backend
-        id: backend
+      - name: Deploy backend
         uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: backend
         with:
           task-definition-family: task-management-dev-backend
           container-name: backend
-          image: ${{ steps.ecr.outputs.registry }}/task-management-dev-backend:${{ github.sha }}-${{ github.run_attempt }}
+          image: ${{ steps.ecr.outputs.registry }}/task-management-dev-backend:${{ github.event.workflow_run.head_sha }}-${{ github.run_attempt }}
 
-      - name: Deploy backend
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+      - uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.backend.outputs.task-definition }}
           service: task-management-dev-backend-service
           cluster: task-management-dev-ecs-cluster
 
-      - name: Render frontend
-        id: frontend
+      - name: Deploy frontend
         uses: aws-actions/amazon-ecs-render-task-definition@v1
+        id: frontend
         with:
           task-definition-family: task-management-dev-frontend
           container-name: frontend
-          image: ${{ steps.ecr.outputs.registry }}/task-management-dev-frontend:${{ github.sha }}-${{ github.run_attempt }}
+          image: ${{ steps.ecr.outputs.registry }}/task-management-dev-frontend:${{ github.event.workflow_run.head_sha }}-${{ github.run_attempt }}
 
-      - name: Deploy frontend
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+      - uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.frontend.outputs.task-definition }}
           service: task-management-dev-frontend-service

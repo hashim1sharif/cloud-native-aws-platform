@@ -1,4 +1,4 @@
-name: Terraform Destroy
+name: Infrastructure Destroy
 
 on:
   workflow_dispatch:
@@ -12,15 +12,9 @@ permissions:
   contents: read
   id-token: write
 
-env:
-  AWS_REGION: eu-west-1
-  AWS_ROLE_ARN: arn:aws:iam::731629701372:role/task-management-terraform-role
-
 jobs:
   destroy:
     runs-on: ubuntu-latest
-
-    if: github.ref == 'refs/heads/main'
 
     defaults:
       run:
@@ -30,31 +24,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.13.3
-
       - name: Confirm destroy
         if: inputs.confirmation != 'DESTROY'
-        run: |
-          echo "Type DESTROY to confirm infrastructure destruction."
-          exit 1
+        run: exit 1
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: ${{ env.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::731629701372:role/task-management-terraform-role
+          aws-region: eu-west-1
 
-      - name: Terraform init
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "1.13.3"
+
+      - name: Terraform Init
         run: terraform init
 
-      - name: Terraform validate
-        run: terraform validate
-
-      - name: Terraform destroy plan
-        run: terraform plan -destroy -out=destroy.tfplan
-
-      - name: Terraform destroy
-        run: terraform apply destroy.tfplan
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
