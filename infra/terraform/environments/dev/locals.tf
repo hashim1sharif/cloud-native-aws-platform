@@ -6,6 +6,6 @@ locals {
     Project     = var.project_name
     Environment = var.environment
     ManagedBy   = "Terraform"
-    Repository  = "task-management-platform"
+    Repository  = "cloud-native-aws-platform"
   }
 }

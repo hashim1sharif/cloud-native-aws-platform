@@ -2,12 +2,14 @@
 resource "aws_ecr_repository" "frontend_ecr_repository" {
   name                 = "${var.name_prefix}-frontend"
   image_tag_mutability = "IMMUTABLE"
+  force_delete         = true
 }
 
 # Stores Docker images for the backend application
 resource "aws_ecr_repository" "backend_ecr_repository" {
   name                 = "${var.name_prefix}-backend"
   image_tag_mutability = "IMMUTABLE"
+  force_delete         = true
 }
 
 # Removes untagged frontend images after the configured number of days
