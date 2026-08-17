@@ -3,6 +3,9 @@ FROM node:22-alpine AS build
 
 WORKDIR /app
 
+# Give the non-root node user ownership of the working directory
+RUN chown node:node /app
+
 # Copy dependency files first to make better use of Docker layer caching
 COPY --chown=node:node package.json package-lock.json ./
 
