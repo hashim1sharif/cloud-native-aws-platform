@@ -1,34 +1,28 @@
-# Build the frontend application
+# Build the React application
 FROM node:22-alpine AS build
 
-# Set the working directory
 WORKDIR /app
 
-# Copy dependency files
-COPY package.json package-lock.json ./
+# Copy dependency files first to make better use of Docker layer caching
+COPY --chown=node:node package.json package-lock.json ./
 
-# Install dependencies
+# Build the application as a non-root user
+USER node
+
 RUN npm ci
 
-# Copy the frontend source code
-COPY . .
+# Copy the application source code
+COPY --chown=node:node . .
 
-# Configure the API URL used during the build
-ARG VITE_API_URL=""
-ENV VITE_API_URL=${VITE_API_URL}
-
-# Build the production-ready frontend
 RUN npm run build
 
 
-# Use unprivileged Nginx to serve the frontend
+# Serve the production build with unprivileged Nginx
 FROM nginxinc/nginx-unprivileged:alpine AS runtime
 
-# Copy the built application into the Nginx web directory
+# Copy only the built frontend files into the runtime image
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Expose the Nginx application port
 EXPOSE 8080
 
-# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
